@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QR Links
 
-## Getting Started
+Dynamic QR codes: every QR encodes a permanent short URL (`/r/<code>`), and you
+can change where that URL points any time — without reprinting the QR.
 
-First, run the development server:
+## How it works
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- The dashboard (`/`) creates links: a name + destination URL → a short code +
+  downloadable QR code (PNG).
+- Scanning the QR hits `/r/<code>`, which counts the click and 302-redirects to
+  the current destination.
+- Edit a destination inline in the table; the printed QR keeps working.
+- The dashboard and API are gated by a single admin password; the redirect
+  route stays public.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. `npm install`
+2. Copy `.env.example` to `.env.local` and fill in `POSTGRES_URL` (from the
+   Vercel Postgres/Neon integration). Leave `ADMIN_PASSWORD` empty locally to
+   skip the login gate.
+3. Create the table: `npm run db:init` (or run `schema.sql` in your database
+   console).
+4. `npm run dev` → http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy (Vercel)
 
-## Learn More
+1. Push this repo to GitHub and import it in Vercel.
+2. In the Vercel project: Storage → add a Postgres (Neon) database — this sets
+   `POSTGRES_URL` automatically.
+3. Add env vars: `ADMIN_PASSWORD` (dashboard password) and
+   `NEXT_PUBLIC_BASE_URL` (e.g. `https://your-app.vercel.app`).
+4. Deploy, then create the `links` table once by running `schema.sql` in the
+   database's query console (or `npm run db:init` locally with the production
+   `POSTGRES_URL` in `.env.local`).
 
-To learn more about Next.js, take a look at the following resources:
+> `NEXT_PUBLIC_BASE_URL` is baked into the QR codes — set it to your final
+> domain before printing anything.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Ideas for later
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Custom QR styling (logo, colors) via `qr-code-styling`
+- Scan analytics (device/location) via a logging table
+- SVG export for print
+- Bulk create via CSV upload
