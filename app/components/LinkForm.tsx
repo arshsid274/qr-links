@@ -56,7 +56,7 @@ export default function LinkForm({
         />
       </label>
       <label className="flex flex-[2] flex-col gap-1 text-sm font-medium text-zinc-700">
-        Destination URL
+        Destination file URL
         <input
           type="url"
           required

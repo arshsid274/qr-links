@@ -1,8 +1,9 @@
 import { sql } from "@/lib/db";
 
-// The redirect engine: /r/[code] → 302 to the current destination.
-// This URL is what gets baked into the QR code, so the QR never changes
-// even when the destination does.
+// The proxy route — core piece. Instead of redirecting, it fetches the
+// destination file (PDF, DOCX, image, zip…) and serves the bytes directly,
+// so the QR URL is what the scanner downloads from. Works cleanly for files
+// since a single binary response has no relative links/assets to break.
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ code: string }> }
@@ -11,11 +12,31 @@ export async function GET(
 
   const { rows } =
     await sql`SELECT destination FROM links WHERE code = ${code}`;
-  if (rows.length === 0) {
-    return new Response("Not found", { status: 404 });
+  const link = rows[0];
+  if (!link) return new Response("Not found", { status: 404 });
+
+  const upstream = await fetch(link.destination, {
+    cache: "no-store",
+  }).catch(() => null);
+  if (!upstream || !upstream.ok) {
+    return new Response("Upstream error", { status: 502 });
   }
 
+  const contentType =
+    upstream.headers.get("content-type") || "application/octet-stream";
+  const contentDisposition =
+    upstream.headers.get("content-disposition") || "attachment";
+
+  // Only count clicks that actually served the file.
   await sql`UPDATE links SET clicks = clicks + 1 WHERE code = ${code}`;
 
-  return Response.redirect(rows[0].destination, 302);
+  // Stream the upstream body through instead of buffering it — keeps memory
+  // flat and avoids the platform's buffered-response size limit on big files.
+  return new Response(upstream.body, {
+    headers: {
+      "content-type": contentType,
+      "content-disposition": contentDisposition,
+      "cache-control": "no-store",
+    },
+  });
 }

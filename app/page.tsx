@@ -30,7 +30,7 @@ export default function Dashboard() {
       <header className="mb-8">
         <h1 className="text-2xl font-semibold text-zinc-900">QR Links</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Dynamic QR codes — print once, change the destination any time.
+          Dynamic QR codes — print once, swap the file it serves any time.
         </p>
       </header>
 

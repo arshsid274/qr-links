@@ -1,17 +1,19 @@
 # QR Links
 
-Dynamic QR codes: every QR encodes a permanent short URL (`/r/<code>`), and you
-can change where that URL points any time — without reprinting the QR.
+Dynamic QR codes: every QR encodes a permanent short URL (`/r/<code>`) that
+serves a file, and you can swap which file it serves any time — without
+reprinting the QR.
 
 ## How it works
 
-- The dashboard (`/`) creates links: a name + destination URL → a short code +
-  downloadable QR code (PNG).
-- Scanning the QR hits `/r/<code>`, which counts the click and 302-redirects to
-  the current destination.
+- The dashboard (`/`) creates links: a name + destination file URL (PDF, DOCX,
+  image, zip…) → a short code + downloadable QR code (PNG).
+- Scanning the QR hits `/r/<code>`, which fetches the destination file
+  server-side, counts the click, and streams the bytes back to the scanner —
+  no redirect, a single binary response.
 - Edit a destination inline in the table; the printed QR keeps working.
-- The dashboard and API are gated by a single admin password; the redirect
-  route stays public.
+- The dashboard and API are gated by a single admin password; the proxy route
+  stays public.
 
 ## Local setup
 
