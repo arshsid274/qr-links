@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE, passwordHash } from "@/lib/auth";
+import { AUTH_COOKIE, getAdminPassword, passwordHash } from "@/lib/auth";
 
 // Next 16's replacement for middleware.ts. The redirect route (/r/[code])
 // stays public; the dashboard and links API require the admin cookie.
@@ -12,7 +12,7 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword = getAdminPassword();
   // No password configured (e.g. local dev before setup) → leave open.
   if (!adminPassword) {
     return NextResponse.next();
