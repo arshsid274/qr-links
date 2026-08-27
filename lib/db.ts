@@ -10,11 +10,14 @@ net.setDefaultAutoSelectFamilyAttemptTimeout?.(5000);
 // database provider ever changes.
 export { sql };
 
+export type LinkMode = "redirect" | "proxy";
+
 export type LinkRow = {
   id: number;
   code: string;
   name: string | null;
   destination: string;
+  mode: LinkMode;
   clicks: number;
   created_at: string;
   updated_at: string;

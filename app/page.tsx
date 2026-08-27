@@ -66,8 +66,9 @@ export default function Dashboard() {
             links={links}
             onUpdated={(updated) =>
               setLinks((prev) =>
+                // Match by id, not code — the code itself is editable.
                 prev
-                  ? prev.map((l) => (l.code === updated.code ? updated : l))
+                  ? prev.map((l) => (l.id === updated.id ? updated : l))
                   : prev
               )
             }
