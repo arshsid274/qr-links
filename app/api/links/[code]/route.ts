@@ -53,7 +53,7 @@ export async function PATCH(
     if (next !== code) {
       if (!isValidCode(next)) {
         return NextResponse.json(
-          { error: "Code may only contain letters, numbers, - and _" },
+          { error: "Code may only contain letters, numbers, . - and _" },
           { status: 400 }
         );
       }

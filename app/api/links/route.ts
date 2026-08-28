@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   if (customCode) {
     if (!isValidCode(customCode)) {
       return NextResponse.json(
-        { error: "Code may only contain letters, numbers, - and _" },
+        { error: "Code may only contain letters, numbers, . - and _" },
         { status: 400 }
       );
     }
