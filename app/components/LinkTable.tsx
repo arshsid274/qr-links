@@ -2,14 +2,8 @@
 
 import { useState } from "react";
 import type { LinkRow } from "@/lib/db";
+import { shortUrlFor } from "@/lib/baseUrl";
 import { downloadQrPng } from "./QRDisplay";
-
-function shortUrl(code: string) {
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "");
-  return `${base}/r/${code}`;
-}
 
 // One editable cell that PATCHes a single field (code or destination) of a
 // link. On success the parent gets the full updated row back, so the short
@@ -98,10 +92,12 @@ function EditableCell({
 
 export default function LinkTable({
   links,
+  baseUrl,
   onUpdated,
   onDeleted,
 }: {
   links: LinkRow[];
+  baseUrl: string;
   onUpdated: (link: LinkRow) => void;
   onDeleted: (code: string) => void;
 }) {
@@ -147,7 +143,7 @@ export default function LinkTable({
               <td className="px-4 py-3">
                 <div className="flex flex-col gap-0.5">
                   <a
-                    href={shortUrl(link.code)}
+                    href={shortUrlFor(baseUrl, link.code)}
                     target="_blank"
                     rel="noreferrer"
                     className="font-mono text-xs text-blue-600 hover:underline"
@@ -183,7 +179,10 @@ export default function LinkTable({
                 <button
                   type="button"
                   onClick={() =>
-                    downloadQrPng(shortUrl(link.code), link.name || link.code)
+                    downloadQrPng(
+                      shortUrlFor(baseUrl, link.code),
+                      link.name || link.code
+                    )
                   }
                   className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
                 >
