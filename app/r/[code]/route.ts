@@ -29,8 +29,22 @@ export async function GET(
 
     const contentType =
       upstream.headers.get("content-type") || "application/octet-stream";
-    const contentDisposition =
-      upstream.headers.get("content-disposition") || "attachment";
+    // Keep the upstream's own disposition if it set one; otherwise force a
+    // download and name the file after the destination's last path segment
+    // (e.g. .../basicapi.pdf → "basicapi.pdf") so it doesn't save as the code.
+    let contentDisposition = upstream.headers.get("content-disposition");
+    if (!contentDisposition) {
+      let filename = "";
+      try {
+        const segments = new URL(link.destination).pathname.split("/");
+        filename = decodeURIComponent(segments[segments.length - 1] || "");
+      } catch {
+        filename = "";
+      }
+      contentDisposition = filename
+        ? `attachment; filename="${filename.replace(/"/g, "")}"`
+        : "attachment";
+    }
 
     await sql`UPDATE links SET clicks = clicks + 1 WHERE code = ${code}`;
 
